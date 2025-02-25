@@ -14,6 +14,71 @@ namespace MvcNetCoreSessionEmpleados.Controllers
             this.repo = repo;
         }
 
+        //                                          -- V5 --
+
+
+
+
+        //                                          -- V4 --
+        public async Task<IActionResult> EmpleadosAlmacenadosV4()
+        {
+            //DEBEMOS RECUPERAR LOS IDS EMPLEADOS QUE TENGAMOS EN SESSION
+            List<int> idsEmpleados =
+                HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS");
+            if (idsEmpleados == null)
+            {
+                ViewData["MENSAJE"] = "NO EXISTEN EMPLEADOS ALMACENADOS.";
+                return View();
+            }
+            else
+            {
+                List<Empleado> empleados =
+                    await this.repo.GetEmpleadosAsync(idsEmpleados);
+                return View(empleados);
+            }
+        }
+
+        public async Task<IActionResult>
+    SessionEmpleadosV4(int? idEmpleado)
+        {
+            if (idEmpleado != null)
+            {
+                //ALMACENAREMOS LO MINIMO QUE PODAMOS (int)
+                List<int> idsEmpleados;
+                if (HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS") == null)
+                {
+                    //NO EXISTE Y CREAMOS LA COLECCION
+                    idsEmpleados = new List<int>();
+                }
+                else
+                {
+                    //EXISTE Y RECUPERAMOS LA COLECCION
+                    idsEmpleados =
+                        HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS");
+                }
+                idsEmpleados.Add(idEmpleado.Value);
+                //REFRESCAMOS LOS DATOS DE SESSION
+                HttpContext.Session.SetObject("IDSEMPLEADOS", idsEmpleados);
+                ViewData["MENSAJE"] = "Empleados almacenados: "
+                    + idsEmpleados.Count;
+            }
+            //COMPROBAMOS SI TENEMOS IDS EN SESSION
+            List<int> ids =
+                HttpContext.Session.GetObject<List<int>>("IDSEMPLEADOS");
+            if (ids == null)
+            {
+                List<Empleado> empleados =
+                    await this.repo.GetEmpleadosAsync();
+                return View(empleados);
+            }
+            else
+            {
+                List<Empleado> empleados =
+                    await this.repo.GetEmpleadosNotSessionAsync(ids);
+                return View(empleados);
+            }
+        }
+        //                                          -- V3 --
         public async Task<IActionResult> EmpleadosAlmacenadosOK()
         {
             //DEBEMOS RECUPERAR LOS IDS EMPLEADOS QUE TENGAMOS EN SESSION
@@ -60,9 +125,7 @@ namespace MvcNetCoreSessionEmpleados.Controllers
                 await this.repo.GetEmpleadosAsync();
             return View(empleados);
         }
-
-
-
+        //                                          -- V2 --
         public async Task<IActionResult> SessionEmpleados(int? idEmpleado)
         {
             if (idEmpleado != null)
@@ -101,7 +164,7 @@ namespace MvcNetCoreSessionEmpleados.Controllers
         {
             return View();
         }
-
+        //                                             -- V1 --
         public async Task<IActionResult> SessionSalarios(int? salario)
         {
             if (salario != null)
