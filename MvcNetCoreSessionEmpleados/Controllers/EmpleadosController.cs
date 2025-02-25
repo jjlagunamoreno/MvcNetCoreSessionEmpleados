@@ -14,6 +14,45 @@ namespace MvcNetCoreSessionEmpleados.Controllers
             this.repo = repo;
         }
 
+        public async Task<IActionResult> SessionEmpleados(int? idEmpleado)
+        {
+            if (idEmpleado != null)
+            {
+                //BUSCAMOS AL EMPLEADO
+                Empleado empleado =
+                    await this.repo.FindEmpleadoAsync(idEmpleado.Value);
+                //EN SESSION TENDREMOS UN CONJUNTO DE EMPLEADOS
+                List<Empleado> empleadosList;
+                //DEBEMOS PREGUNTAR SI TENEMOS EL CONJUNTO DE EMPLEADOS
+                //ALMACENADOS EN SESSION
+                if (HttpContext.Session.GetObject<List<Empleado>>("EMPLEADOS") != null)
+                {
+                    //RECUPERAMOS LOS EMPLEADOS QUE TENGAMOS EN SESSION
+                    empleadosList =
+                        HttpContext.Session.GetObject<List<Empleado>>("EMPLEADOS");
+                }
+                else
+                {
+                    //SI NO EXISTE, INSTANCIAMOS LA COLECCION
+                    empleadosList = new List<Empleado>();
+                }
+                //ALMACENAMOS EL EMPLEADO DENTRO DE NUESTRA COLECCION
+                empleadosList.Add(empleado);
+                //GUARDAMOS EN SESSION LA COLECCION CON EL NUEVO EMPLEADO
+                HttpContext.Session.SetObject("EMPLEADOS", empleadosList);
+                ViewData["MENSAJE"] = "Empleado " + empleado.Apellido
+                    + " almacenado correctamente.";
+            }
+            List<Empleado> empleados =
+                await this.repo.GetEmpleadosAsync();
+            return View(empleados);
+        }
+
+        public IActionResult EmpleadosAlmacenados()
+        {
+            return View();
+        }
+
         public async Task<IActionResult> SessionSalarios(int? salario)
         {
             if (salario != null)
