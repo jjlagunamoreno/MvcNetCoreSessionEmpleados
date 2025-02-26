@@ -1,42 +1,68 @@
 ﻿@model List<Empleado>
 
 @{
-    // RECUPERAMOS LOS IDS DE EMPLEADOS ALMACENADOS EN SESSION
+    ViewData["Title"] = "Empleados Almacenados en Session V5";
     List<int> ids = Context.Session.GetObject<List<int>>("IDSEMPLEADOS");
+
+    //NECESITAMMOS MEMORYCACHE PARA LOS DIBUJOS
+    List<Empleado> favoritos =
+    memoryCache.Get<List<Empleado>>("FAVORITOS");
 }
 
-<h1 style="color:blue">Session Empleados V5</h1>
+<h1 class="text-primary text-center">Empleados Almacenados en Session V5</h1>
 
-<p>
-    <a asp-controller="Empleados"
-       asp-action="EmpleadosAlmacenadosV5">
-        Empleados Almacenados V5
+@if(favoritos != null)
+{
+    <h3 style ="background-color:yellow; color:white;">
+        Favoritos almacenados: @favoritos.Count
+    </h3>
+}
+
+@if(ids != null)
+{
+    <h3 style="background-color:blue; color:white;">
+        Empleados Session: @ids.Count
+    </h3>
+}
+
+<p class="text-center">
+    <a asp-controller="Empleados" asp-action="EmpleadosFavoritos" class="btn btn-warning">
+        Ver Empleados Favoritos ⭐
     </a>
 </p>
 
-<h4>@ViewData["MENSAJE"]</h4>
+<h4 class="text-danger">@ViewData["MENSAJE"]</h4>
 
 <ul class="list-group">
     @foreach (Empleado empleado in Model)
     {
-        <li class="list-group-item list-group-item-info">
-            @empleado.Apellido
+        bool esFavorito = favoritos != null && favoritos.Any(f => f.IdEmpleado == empleado.IdEmpleado);
 
-            @* PREGUNTAMOS SI EL EMPLEADO ESTÁ EN SESSION *@
-            @if (ids != null && ids.Contains(empleado.IdEmpleado))
-            {
-                // SI EL EMPLEADO ESTÁ EN SESSION, MOSTRAMOS LA IMAGEN
-                <img src="~/images/ok.png" style="width:35px; height: 35px" />
-            }
-            else
-            {
-                // SI NO ESTÁ EN SESSION, MOSTRAMOS EL ENLACE PARA AGREGARLO
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="fw-bold">@empleado.Apellido</span>
+
+            <div>
+                @if (ids != null && ids.Contains(empleado.IdEmpleado))
+                {
+                    <img src="~/images/ok.png" style="width:35px; height: 35px" />
+                }
+                else
+                {
+                    <a asp-controller="Empleados"
+                       asp-action="SessionEmpleadosV5"
+                       asp-route-idempleado="@empleado.IdEmpleado"
+                       class="btn btn-success btn-sm">
+                        Almacenar
+                    </a>
+                }
+
                 <a asp-controller="Empleados"
                    asp-action="SessionEmpleadosV5"
-                   asp-route-idempleado="@empleado.IdEmpleado">
-                    Almacenar empleado
+                   asp-route-idfavorito="@empleado.IdEmpleado"
+                   class="btn btn-sm ms-2 @(esFavorito ? "btn-warning" : "btn-outline-secondary")">
+                    ⭐
                 </a>
-            }
+            </div>
         </li>
     }
 </ul>
