@@ -1,4 +1,6 @@
-﻿@model List<Empleado>
+﻿@using Microsoft.Extensions.Caching.Memory
+@inject IMemoryCache memoryCache
+@model List<Empleado>
 
 @{
     ViewData["Title"] = "Empleados Favoritos";
@@ -6,9 +8,12 @@
 
 <h1 class="text-center text-fuchsia">Empleados Favoritos</h1>
 
-<p class="mt-3">
-    <a asp-controller="Empleados" asp-action="SessionEmpleadosV5" class="btn btn-primary">
-        Volver a almacenar empleados V5
+<p class="text-center mt-3">
+    <a asp-controller="Empleados" asp-action="SessionEmpleadosV5" class="btn btn-danger">
+        💻 Volver Session
+    </a>
+    <a asp-controller="Empleados" asp-action="EmpleadosAlmacenadosV5" class="btn btn-success">
+        📁 Ver Empleados Almacenados
     </a>
 </p>
 
@@ -43,7 +48,7 @@ else
                            asp-action="EliminarFavorito"
                            asp-route-idempleado="@emp.IdEmpleado"
                            class="btn btn-outline-danger btn-sm">
-                            Quitar Favorito ❌
+                            ❌ Quitar Favorito
                         </a>
                     </td>
                 </tr>
